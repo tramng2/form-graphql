@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 import Button from '../Button';
 import { TextField, FormControl, InputLabel, Select, MenuItem, Container, Grid, Typography, makeStyles } from '@material-ui/core';
 import gpl from 'graphql-tag';
-import { gql, useQuery, useLazyQuery } from '@apollo/client';
+import { useQuery, useLazyQuery } from '@apollo/client';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -41,26 +41,26 @@ const FORM_VALIDATION = Yup.object().shape({
     .required('Required'),
   country: Yup.string()
     .required('Required'),
-  // countryState: Yup.string()
-  //   .required('Required')
+  countryState: Yup.string()
+    .required('Required')
 });
 
 const CountriesQuery = gpl`
-query {
-  countries {
-  name
-  code
+  query {
+    countries {
+    name
+    code
+    }
   }
-}
 `
 
 const StatesQuery = gpl` 
-query getCities ($code: ID!) {
-  country (code: $code) {
-  states {
-    name
+  query getCities ($code: ID!) {
+    country (code: $code) {
+    states {
+      name
+    }
   }
-}
 }`
 
 const Form = props => {
@@ -72,9 +72,6 @@ const Form = props => {
     values,
     handleChange,
     handleSubmit } = props;
-
-
-  
 
   useEffect(() => {
     getData({ variables: { code: values.country } })
@@ -174,7 +171,7 @@ const Form = props => {
                     query.data.country.states.length !== 0 ? (
                       <FormControl variant="outlined" fullWidth="true" onSe>
                         <InputLabel>Choose state</InputLabel>
-                        <Select name="countryState" value={values.countryState} onChange={handleChange}>
+                        <Select name="countryState" value={values.countryState} onChange={handleChange} label="ChooseState">
                           {query.data.country.states.map((state, index) => (
                             <MenuItem value={state.name} key={index}>
                               {state.name}
@@ -216,7 +213,6 @@ const WrappedBaseFrom = withFormik({
   mapPropsToValues: () => (INITIAL_FORM_STATE),
   validationSchema: FORM_VALIDATION,
   handleSubmit: (values) => {
-
     console.log(values);
   },
 })(Form);
