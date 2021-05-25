@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '../Header';
 import { withFormik } from 'formik';
 import * as Yup from 'yup';
+
 import Button from '../Button';
 import { TextField, FormControl, InputLabel, Select, MenuItem, Container, Grid, Typography, makeStyles } from '@material-ui/core';
 import gpl from 'graphql-tag';
@@ -66,16 +67,18 @@ const StatesQuery = gpl`
 const Form = props => {
   const classes = useStyles();
   const { loadingCountries, errorCountries, data } = useQuery(CountriesQuery);
-  const [getData, query] = useLazyQuery(StatesQuery);
+  const [getCountryState, query] = useLazyQuery(StatesQuery);
 
   const {
     values,
+    errors,
+    touched,
     handleChange,
     handleSubmit } = props;
 
   useEffect(() => {
-    getData({ variables: { code: values.country } })
-  }, [values.country, getData])
+    getCountryState({ variables: { code: values.country } })
+  }, [values.country, getCountryState])
 
   return (
     <Grid container>
@@ -101,6 +104,8 @@ const Form = props => {
                     label="First Name"
                     value={values.firstName}
                     onChange={handleChange}
+                    error={touched.firstName && errors.firstName}
+                    helperText={touched.firstName && errors.firstName}
                   />
                 </Grid>
 
@@ -111,6 +116,8 @@ const Form = props => {
                     name="lastName"
                     label="Last Name"
                     value={values.lastName}
+                    error={touched.lastName && errors.lastName}
+                    helperText={touched.lastName && errors.lastName}
                     onChange={handleChange}
                   />
                 </Grid>
@@ -122,6 +129,8 @@ const Form = props => {
                     name="email"
                     label="Email"
                     value={values.email}
+                    error={touched.email && errors.email}
+                    helperText={touched.email && errors.email}
                     onChange={handleChange}
                   />
                 </Grid>
@@ -133,6 +142,8 @@ const Form = props => {
                     name="phone"
                     label="Phone"
                     value={values.phone}
+                    error={touched.phone && errors.phone}
+                    helperText={touched.phone && errors.phone}
                     onChange={handleChange}
                   />
                 </Grid>
@@ -148,15 +159,17 @@ const Form = props => {
                     variant="outlined"
                     name="addressLine"
                     label="Address Line"
+                    error={touched.addressLine && errors.addressLine}
+                    helperText={touched.addressLine && errors.addressLine}
                     value={values.addressLine}
                     onChange={handleChange}
                   />
                 </Grid>
 
                 <Grid item xs={6}>
-                  <FormControl variant="outlined" fullWidth="true">
+                  <FormControl variant="outlined" fullWidth="true" >
                     <InputLabel>Choose country</InputLabel>
-                    <Select name="country" value={values.country} onChange={handleChange} label="Choose country">
+                    <Select name="country" value={values.country} onChange={handleChange} label="Choose country" error={touched.country && errors.country} helperText={touched.country && errors.country}>
                       {data && data.countries ? data.countries.map((countryObj, index) => (
                         <MenuItem value={countryObj.code} key={index}>
                           {countryObj.name}
@@ -171,7 +184,7 @@ const Form = props => {
                     query.data.country.states.length !== 0 ? (
                       <FormControl variant="outlined" fullWidth="true" onSe>
                         <InputLabel>Choose state</InputLabel>
-                        <Select name="countryState" value={values.countryState} onChange={handleChange} label="ChooseState">
+                        <Select name="countryState" value={values.countryState} onChange={handleChange} label="ChooseState" error={touched.State && errors.State} helperText={touched.State && errors.State}>
                           {query.data.country.states.map((state, index) => (
                             <MenuItem value={state.name} key={index}>
                               {state.name}
@@ -210,8 +223,10 @@ const Form = props => {
 };
 
 const WrappedBaseFrom = withFormik({
+  validationSchema: (props) => {
+    return FORM_VALIDATION;
+  },
   mapPropsToValues: () => (INITIAL_FORM_STATE),
-  validationSchema: FORM_VALIDATION,
   handleSubmit: (values) => {
     console.log(values);
   },
